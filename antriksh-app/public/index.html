@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antriksh — Your Birth Chart, Decoded</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0C0E24;
+    --deep-space:#171A3D;
+    --panel:#1C1F49;
+    --panel2:#20244F;
+    --marigold:#E8A33D;
+    --moonlight:#F4EFE3;
+    --rose-dust:#C97064;
+    --peacock:#2F8F86;
+    --amethyst:#8577B5;
+    --hairline: rgba(244,239,227,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(133,119,181,0.12), transparent 55%),
+      radial-gradient(ellipse at 80% 20%, rgba(47,143,134,0.10), transparent 50%),
+      var(--night);
+    color:var(--moonlight);
+    font-family:'Jost', sans-serif;
+    font-weight:300;
+    line-height:1.6;
+    overflow-x:hidden;
+    position:relative;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  #stars{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  #stars circle{fill:var(--moonlight); opacity:0.5;}
+
+  .wrap{position:relative; z-index:1; max-width:1040px; margin:0 auto; padding:0 28px;}
+
+  header{padding:36px 0 0; display:flex; align-items:center; justify-content:space-between;}
+  .word{display:flex; flex-direction:column; line-height:1;}
+  .word .deva{font-family:'Cinzel',serif; font-size:15px; letter-spacing:0.14em; color:var(--marigold);}
+  .word .lat{font-family:'Cinzel',serif; font-size:22px; letter-spacing:0.22em; color:var(--moonlight);}
+  nav a{color:var(--moonlight); opacity:0.7; text-decoration:none; font-size:14px; letter-spacing:0.04em; cursor:pointer;}
+
+  .hero{padding:44px 0 30px; text-align:center; position:relative;}
+  #heroScene{width:100%; max-width:460px; height:300px; margin:0 auto 6px; position:relative;}
+  #heroScene canvas{display:block; margin:0 auto;}
+  .eyebrow{font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.28em; color:var(--peacock); text-transform:uppercase; margin-bottom:14px;}
+  h1.hero-title{font-family:'Cinzel', serif; font-size:clamp(32px,5vw,54px); font-weight:600; margin:0 0 18px; color:var(--moonlight); letter-spacing:0.01em;}
+  h1.hero-title em{font-family:'Cormorant Garamond', serif; font-style:italic; color:var(--marigold); font-weight:500;}
+  .hero p{max-width:560px; margin:0 auto; font-size:17px; color:rgba(244,239,227,0.75); font-weight:300;}
+  .scroll-cta{display:inline-block; margin-top:26px; font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.12em; color:var(--marigold); text-decoration:none; border-bottom:1px solid var(--marigold); padding-bottom:3px; cursor:pointer;}
+
+  .tilt{will-change:transform; transform-style:preserve-3d;}
+
+  .ledger{background:var(--deep-space); border:1px solid var(--hairline); border-radius:6px; padding:40px; margin:56px 0; position:relative; box-shadow:0 30px 60px -30px rgba(0,0,0,0.6);}
+  .ledger::before{content:''; position:absolute; top:14px; left:14px; right:14px; bottom:14px; border:1px solid rgba(232,163,61,0.18); border-radius:3px; pointer-events:none;}
+  .ledger h2{font-family:'Cinzel', serif; font-size:20px; letter-spacing:0.08em; margin:0 0 6px; color:var(--marigold); font-weight:600;}
+  .ledger .sub{font-size:14px; color:rgba(244,239,227,0.6); margin-bottom:32px;}
+  .field-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px 28px;}
+  .field{display:flex; flex-direction:column; gap:8px;}
+  .field.full{grid-column:1/-1;}
+  label{font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.16em; color:var(--peacock); text-transform:uppercase;}
+  input{
+    background:transparent; border:none; border-bottom:1px solid var(--hairline);
+    color:var(--moonlight); font-family:'Jost', sans-serif; font-size:16px; font-weight:400;
+    padding:8px 2px; outline:none; transition:border-color 0.25s ease;
+  }
+  input:focus{border-color:var(--marigold);}
+  input::placeholder{color:rgba(244,239,227,0.3);}
+  .submit-row{margin-top:36px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  button.primary{
+    background:var(--marigold); color:var(--night); border:none; padding:14px 30px;
+    font-family:'Cinzel', serif; font-size:14px; letter-spacing:0.1em; font-weight:600;
+    border-radius:3px; cursor:pointer; transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  button.primary:hover{transform:translateY(-1px); box-shadow:0 8px 24px rgba(232,163,61,0.25);}
+  button.primary:disabled{opacity:0.5; cursor:wait; transform:none; box-shadow:none;}
+  .form-msg{font-size:13px; color:var(--rose-dust);}
+
+  .loading{display:none; text-align:center; padding:60px 0; color:rgba(244,239,227,0.65);}
+  .loading.show{display:block;}
+  .loading .glyph{font-family:'Cinzel',serif; font-size:28px; color:var(--marigold); animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:0.35;} 50%{opacity:1;}}
+  .loading .txt{margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.08em;}
+
+  #results{display:none;}
+  #results.show{display:block;}
+  section.block{margin:68px 0;}
+  .block-head{display:flex; align-items:baseline; gap:14px; margin-bottom:8px;}
+  .block-head .num{font-family:'JetBrains Mono',monospace; color:var(--marigold); font-size:13px;}
+  .block-head h2{font-family:'Cinzel', serif; font-size:22px; font-weight:600; margin:0; letter-spacing:0.04em;}
+  .block-sub{font-size:14px; color:rgba(244,239,227,0.55); margin:0 0 22px;}
+  hr.hair{border:none; border-top:1px solid var(--hairline); margin:0 0 26px;}
+
+  .numerals{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  .numeral-card{background:linear-gradient(155deg,var(--panel2),var(--panel)); border:1px solid var(--hairline); border-radius:6px; padding:28px; position:relative; overflow:hidden; box-shadow:0 20px 40px -24px rgba(0,0,0,0.7);}
+  .numeral-card .tag{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.16em; color:var(--peacock); text-transform:uppercase;}
+  .numeral-card .name{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:19px; color:var(--marigold); margin:4px 0 14px;}
+  .numeral-card .big{font-family:'Cinzel',serif; font-size:64px; font-weight:700; line-height:1; color:var(--moonlight); opacity:0.95;}
+  .numeral-card p.insight{font-size:15px; color:rgba(244,239,227,0.8); margin-top:14px; font-weight:300;}
+  .attr-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-top:20px; padding-top:18px; border-top:1px dotted var(--hairline);}
+  .attr{font-size:12.5px;}
+  .attr .k{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--amethyst); text-transform:uppercase; display:block; margin-bottom:2px;}
+  .attr .v{color:rgba(244,239,227,0.85);}
+  .compat-line{margin-top:16px; font-size:12.5px; color:rgba(244,239,227,0.65);}
+  .compat-line .k{font-family:'JetBrains Mono',monospace; color:var(--rose-dust); letter-spacing:0.06em; margin-right:6px;}
+
+  .wheel-wrap{background:linear-gradient(155deg,var(--panel2),var(--panel)); border:1px solid var(--hairline); border-radius:6px; padding:32px; display:flex; gap:36px; flex-wrap:wrap; align-items:center; box-shadow:0 24px 50px -26px rgba(0,0,0,0.7);}
+  .wheel-stage{perspective:1100px; flex-shrink:0;}
+  .wheel-disc{animation:floatDisc 7s ease-in-out infinite;}
+  @keyframes floatDisc{0%,100%{transform:rotateX(20deg) rotateZ(0deg) translateY(0px);} 50%{transform:rotateX(16deg) rotateZ(1.2deg) translateY(-5px);}}
+  .wheel-disc svg{display:block; filter:drop-shadow(0 22px 30px rgba(0,0,0,0.55));}
+  .wheel-legend{flex:1; min-width:220px;}
+  .wheel-legend p{font-size:14px; color:rgba(244,239,227,0.72); margin:0 0 16px;}
+  .planet-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+  .planet-list li{font-size:13px; display:flex; flex-direction:column; gap:2px; border-bottom:1px dotted var(--hairline); padding-bottom:8px;}
+  .planet-list li .row1{display:flex; justify-content:space-between;}
+  .planet-list li .pn{color:var(--moonlight);}
+  .planet-list li .ph{font-family:'JetBrains Mono',monospace; color:var(--marigold); font-size:12px;}
+  .planet-list li .note{font-size:12px; color:rgba(244,239,227,0.55);}
+  .house-label{font-family:'JetBrains Mono',monospace; font-size:10px; fill:rgba(244,239,227,0.4);}
+  .planet-glyph{font-family:'Cinzel',serif; font-size:13px; fill:var(--marigold); font-weight:600;}
+
+  .compass-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  .compass-card{background:var(--panel); border:1px solid var(--hairline); border-radius:6px; padding:26px; box-shadow:0 18px 36px -22px rgba(0,0,0,0.65);}
+  .compass-card h3{font-family:'Cinzel',serif; font-size:15px; letter-spacing:0.06em; margin:0 0 14px;}
+  .compass-card.strengths h3{color:var(--peacock);}
+  .compass-card.challenges h3{color:var(--rose-dust);}
+  .compass-card ul{margin:0; padding-left:18px;}
+  .compass-card li{font-size:14px; color:rgba(244,239,227,0.82); margin-bottom:8px;}
+
+  .reading-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  .read-card{background:var(--panel); border:1px solid var(--hairline); border-radius:6px; padding:26px; box-shadow:0 18px 36px -22px rgba(0,0,0,0.65);}
+  .read-card .icon{font-family:'Cinzel',serif; font-size:20px; margin-bottom:10px;}
+  .read-card.love .icon{color:var(--rose-dust);}
+  .read-card.career .icon{color:var(--peacock);}
+  .read-card.success .icon{color:var(--marigold);}
+  .read-card h3{font-family:'Cinzel',serif; font-size:15px; letter-spacing:0.06em; margin:0 0 10px;}
+  .read-card p{font-size:14.5px; color:rgba(244,239,227,0.82); font-weight:300;}
+
+  .duo-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  .duo-card{background:linear-gradient(155deg,var(--panel2),var(--panel)); border:1px solid var(--hairline); border-radius:6px; padding:26px; box-shadow:0 18px 36px -22px rgba(0,0,0,0.65);}
+  .duo-card h3{font-family:'Cinzel',serif; font-size:15px; letter-spacing:0.06em; margin:0 0 10px; color:var(--amethyst);}
+  .duo-card p{font-size:14.5px; color:rgba(244,239,227,0.82);}
+
+  .remedies{background:var(--deep-space); border:1px solid var(--hairline); border-radius:6px; padding:28px 32px; box-shadow:0 18px 36px -22px rgba(0,0,0,0.65);}
+  .remedies ul{margin:0; padding-left:18px;}
+  .remedies li{font-size:14.5px; color:rgba(244,239,227,0.82); margin-bottom:8px;}
+
+  .disclaimer{font-size:12px; color:rgba(244,239,227,0.45); text-align:center; max-width:640px; margin:50px auto 10px; line-height:1.7;}
+  footer{text-align:center; padding:40px 0 60px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.1em; color:rgba(244,239,227,0.35);}
+
+  @media (max-width: 720px){
+    .field-grid{grid-template-columns:1fr;}
+    .numerals{grid-template-columns:1fr;}
+    .reading-grid{grid-template-columns:1fr;}
+    .compass-grid{grid-template-columns:1fr;}
+    .duo-grid{grid-template-columns:1fr;}
+    .wheel-wrap{flex-direction:column;}
+    .wheel-stage{margin:0 auto;}
+  }
+</style>
+</head>
+<body>
+
+<svg id="stars"></svg>
+
+<div class="wrap">
+  <header>
+    <div class="word">
+      <span class="deva">अंतरिक्ष</span>
+      <span class="lat">ANTRIKSH</span>
+    </div>
+    <nav><a onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'})">Chart my sky</a></nav>
+  </header>
+
+  <section class="hero">
+    <div id="heroScene" aria-hidden="true"></div>
+    <div class="eyebrow">Numerology · Kundli · Reflection</div>
+    <h1 class="hero-title">The sky remembers <em>the moment</em><br>you arrived</h1>
+    <p>Give Antriksh your name, birth date, birth time, and birthplace. Watch a small armillary sphere trace the moment you were born, then unfold your Mulank, your Bhagyank, a symbolic chart of the planets, and what they suggest about love, work, and the years ahead.</p>
+    <a class="scroll-cta" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'})">↓ Begin the reading</a>
+  </section>
+
+  <section class="ledger" id="form">
+    <h2>Birth Record</h2>
+    <div class="sub">Every field shapes the reading — enter it as it appears on your birth certificate, if you have it.</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="fname">Full Name</label>
+        <input type="text" id="fname" placeholder="e.g. Ananya Sharma">
+      </div>
+      <div class="field">
+        <label for="fdob">Date of Birth</label>
+        <input type="date" id="fdob">
+      </div>
+      <div class="field">
+        <label for="ftob">Time of Birth</label>
+        <input type="time" id="ftob">
+      </div>
+      <div class="field full">
+        <label for="fplace">Place of Birth</label>
+        <input type="text" id="fplace" placeholder="e.g. Lucknow, Uttar Pradesh, India">
+      </div>
+    </div>
+    <div class="submit-row">
+      <button class="primary" id="submitBtn" onclick="runReading()">Calculate My Chart</button>
+      <span class="form-msg" id="formMsg"></span>
+    </div>
+  </section>
+
+  <div class="loading" id="loading">
+    <div class="glyph">ॐ</div>
+    <div class="txt" id="loadingTxt">CONSULTING THE STARS…</div>
+  </div>
+
+  <div id="results">
+
+    <section class="block">
+      <div class="block-head"><span class="num">01</span><h2>Your Core Numbers</h2></div>
+      <p class="block-sub">Vedic numerology reduces your birth date to two ruling digits — the self, and the destiny it's walking toward.</p>
+      <hr class="hair">
+      <div class="numerals">
+        <div class="numeral-card tilt" id="mulankCard">
+          <div class="tag">Mulank · Root Number</div>
+          <div class="name">Who you are, at the root</div>
+          <div class="big" id="mulankNum">0</div>
+          <p class="insight" id="mulankText"></p>
+          <div class="attr-grid" id="mulankAttrs"></div>
+          <div class="compat-line"><span class="k">HARMONIZES WITH</span><span class="v" id="mulankCompat"></span></div>
+        </div>
+        <div class="numeral-card tilt" id="bhagyankCard">
+          <div class="tag">Bhagyank · Destiny Number</div>
+          <div class="name">The path you're walking toward</div>
+          <div class="big" id="bhagyankNum">0</div>
+          <p class="insight" id="bhagyankText"></p>
+          <div class="attr-grid" id="bhagyankAttrs"></div>
+          <div class="compat-line"><span class="k">HARMONIZES WITH</span><span class="v" id="bhagyankCompat"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="num">02</span><h2>Planets in Your Houses</h2></div>
+      <p class="block-sub">A symbolic Kundli — nine planets seated across twelve houses. Tilt your cursor across the disc.</p>
+      <hr class="hair">
+      <div class="wheel-wrap tilt">
+        <div class="wheel-stage">
+          <div class="wheel-disc"><svg id="wheel" width="300" height="300" viewBox="0 0 300 300"></svg></div>
+        </div>
+        <div class="wheel-legend">
+          <p id="ascendantLine">Ascendant: —</p>
+          <ul class="planet-list" id="planetList"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="num">03</span><h2>Personality Compass</h2></div>
+      <p class="block-sub">What the chart says works in your favor, and what it asks you to watch.</p>
+      <hr class="hair">
+      <div class="compass-grid">
+        <div class="compass-card strengths tilt"><h3>Strengths</h3><ul id="strengthsList"></ul></div>
+        <div class="compass-card challenges tilt"><h3>Watch For</h3><ul id="challengesList"></ul></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="num">04</span><h2>Love, Work &amp; the Road Ahead</h2></div>
+      <hr class="hair">
+      <div class="reading-grid">
+        <div class="read-card love tilt"><div class="icon">♥</div><h3>Love Life</h3><p id="loveText"></p></div>
+        <div class="read-card career tilt"><div class="icon">⚒</div><h3>Career</h3><p id="careerText"></p></div>
+        <div class="read-card success tilt"><div class="icon">✦</div><h3>Success</h3><p id="successText"></p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="num">05</span><h2>This Chapter</h2></div>
+      <hr class="hair">
+      <div class="duo-grid">
+        <div class="duo-card tilt"><h3>This Year's Theme</h3><p id="yearText"></p></div>
+        <div class="duo-card tilt"><h3>Compatibility Notes</h3><p id="compatText"></p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><span class="num">06</span><h2>Suggested Remedies</h2></div>
+      <hr class="hair">
+      <div class="remedies tilt"><ul id="remedyList"></ul></div>
+    </section>
+
+    <p class="disclaimer">Antriksh generates a symbolic, AI-interpreted reading for reflection and entertainment. Precise planetary positions require ephemeris-based astronomical calculation from an exact birth time and location; this chart approximates that placement rather than computing it scientifically. Numerology attributes (ruling planets, colors, gemstones) follow traditional convention and are offered in that spirit. This is not a substitute for professional astrological, medical, financial, or legal advice.</p>
+  </div>
+
+  <footer>ANTRIKSH — बनाया गया ब्रह्मांड के लिए</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const API_BASE = '/api';
+
+// ================= starfield =================
+(function(){
+  const svg = document.getElementById('stars');
+  const w = window.innerWidth, h = Math.max(window.innerHeight, document.body.scrollHeight);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  let s = '';
+  for(let i=0;i<140;i++){
+    const x = Math.random()*w, y = Math.random()*h, r = Math.random()*1.3+0.3, o = Math.random()*0.6+0.15;
+    s += `<circle cx="${x}" cy="${y}" r="${r}" style="opacity:${o}"/>`;
+  }
+  svg.innerHTML = s;
+})();
+
+// ================= hero 3D scene =================
+function initHeroScene(){
+  const container = document.getElementById('heroScene');
+  if(!container || typeof THREE === 'undefined') return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const width = container.clientWidth, height = container.clientHeight;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 1000);
+  camera.position.set(0,0,6.5);
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setSize(width,height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  container.appendChild(renderer.domElement);
+
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 260;
+  const positions = new Float32Array(starCount*3);
+  for(let i=0;i<starCount;i++){
+    const r = 5.5 + Math.random()*3.5;
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.acos((Math.random()*2)-1);
+    positions[i*3] = r*Math.sin(phi)*Math.cos(theta);
+    positions[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+    positions[i*3+2] = r*Math.cos(phi);
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  const starMat = new THREE.PointsMaterial({color:0xF4EFE3, size:0.035, transparent:true, opacity:0.65});
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
+
+  const ringColors = [0xE8A33D, 0x2F8F86, 0x8577B5];
+  const rings = [];
+  ringColors.forEach((col, i)=>{
+    const geo = new THREE.TorusGeometry(2.15 - i*0.5, 0.011, 8, 120);
+    const mat = new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:0.55});
+    const ring = new THREE.Mesh(geo, mat);
+    ring.rotation.x = (Math.PI/2) * (i===0?0.2:1) + i*0.45;
+    ring.rotation.y = i*0.55;
+    scene.add(ring);
+    rings.push(ring);
+  });
+
+  const sunMat = new THREE.MeshBasicMaterial({color:0xE8A33D});
+  const sun = new THREE.Mesh(new THREE.SphereGeometry(0.2, 24,24), sunMat);
+  scene.add(sun);
+  const glow = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24,24), new THREE.MeshBasicMaterial({color:0xE8A33D, transparent:true, opacity:0.16}));
+  sun.add(glow);
+
+  const orbitData = [
+    {radius:0.95, speed:0.013, size:0.06, color:0xC97064},
+    {radius:1.4,  speed:0.009, size:0.08, color:0x2F8F86},
+    {radius:1.85, speed:0.006, size:0.05, color:0xF4EFE3},
+    {radius:2.3,  speed:0.0037,size:0.09, color:0x8577B5}
+  ];
+  const orbitGroups = orbitData.map(o=>{
+    const group = new THREE.Object3D();
+    group.rotation.x = (Math.random()*0.6)-0.3;
+    group.rotation.z = (Math.random()*0.6)-0.3;
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(o.size,16,16), new THREE.MeshBasicMaterial({color:o.color}));
+    mesh.position.set(o.radius,0,0);
+    group.add(mesh);
+    scene.add(group);
+    return {group, speed:o.speed};
+  });
+
+  let mouseX=0, mouseY=0;
+  container.addEventListener('mousemove', (e)=>{
+    const rect = container.getBoundingClientRect();
+    mouseX = ((e.clientX-rect.left)/rect.width) - 0.5;
+    mouseY = ((e.clientY-rect.top)/rect.height) - 0.5;
+  });
+
+  function renderFrame(){
+    stars.rotation.y += reduced?0:0.0006;
+    rings.forEach((r,i)=>{ r.rotation.z += reduced?0:(0.0015 + i*0.0006); });
+    orbitGroups.forEach(o=>{ o.group.rotation.y += reduced?0:o.speed; });
+    camera.position.x += (mouseX*1.1 - camera.position.x) * 0.04;
+    camera.position.y += (-mouseY*1.1 - camera.position.y) * 0.04;
+    camera.lookAt(0,0,0);
+    renderer.render(scene, camera);
+  }
+
+  if(reduced){
+    renderFrame();
+  } else {
+    (function loop(){ requestAnimationFrame(loop); renderFrame(); })();
+  }
+
+  window.addEventListener('resize', ()=>{
+    const w = container.clientWidth, h = container.clientHeight;
+    if(!w || !h) return;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  });
+}
+window.addEventListener('load', initHeroScene);
+
+// ================= tilt utility =================
+function attachTilt(el, max){
+  max = max || 8;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  el.addEventListener('mousemove', (e)=>{
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left)/r.width - 0.5;
+    const py = (e.clientY - r.top)/r.height - 0.5;
+    el.style.transition = 'transform 0.12s ease-out';
+    el.style.transform = `perspective(900px) rotateX(${(-py*max).toFixed(2)}deg) rotateY(${(px*max).toFixed(2)}deg) translateZ(4px)`;
+  });
+  el.addEventListener('mouseleave', ()=>{
+    el.style.transition = 'transform 0.6s cubic-bezier(.22,1,.36,1)';
+    el.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+  });
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('.tilt').forEach(el => attachTilt(el, 7));
+});
+
+// ================= numerology =================
+function reduceDigits(n){
+  n = Math.abs(n);
+  while(n > 9){ n = String(n).split('').reduce((a,b)=>a+parseInt(b,10),0); }
+  return n;
+}
+function computeMulank(dobStr){
+  const day = parseInt(dobStr.split('-')[2],10);
+  return reduceDigits(day);
+}
+function computeBhagyank(dobStr){
+  const digitsSum = dobStr.replace(/-/g,'').split('').reduce((a,b)=>a+parseInt(b,10),0);
+  return reduceDigits(digitsSum);
+}
+
+const MULANK_TEXT = {
+  1:"Independent and driven — a natural starter who leads by example and dislikes being told how to do things.",
+  2:"Sensitive and cooperative — you read a room instantly and thrive through partnership rather than solo effort.",
+  3:"Expressive and creative — words, art, or performance are how you process and share what you feel.",
+  4:"Grounded and methodical — you build things that last and trust structure over shortcuts.",
+  5:"Restless and curious — freedom and change keep you alive; routine wears you down fast.",
+  6:"Nurturing and responsible — people lean on you, and you tend to make that your identity.",
+  7:"Introspective and analytical — you need solitude to think, and you rarely accept things at face value.",
+  8:"Ambitious and pragmatic — power, money, and results matter to you more than most will admit to.",
+  9:"Idealistic and compassionate — you feel other people's pain personally and want to leave things better than you found them."
+};
+const BHAGYANK_TEXT = {
+  1:"Your path bends toward leadership — life keeps placing you in positions where you have to decide, not follow.",
+  2:"Your path unfolds through relationships — the right partnerships, more than solo ambition, open your biggest doors.",
+  3:"Your path is creative and social — recognition tends to arrive through communication, art, or public expression.",
+  4:"Your path rewards patience — steady, unglamorous work compounds into something solid few can shake.",
+  5:"Your path moves through change — travel, reinvention, or unconventional choices tend to pay off more than staying still.",
+  6:"Your path runs through care and duty — family, community, or service end up defining your legacy.",
+  7:"Your path is inward — study, research, or spiritual depth matter more to your fulfillment than external wins.",
+  8:"Your path is built on authority and material mastery — money and status lessons repeat until you handle them wisely.",
+  9:"Your path is humanitarian — you're pulled, again and again, toward causes bigger than your own comfort."
+};
+const NUMBER_DATA = {
+  1:{planet:"Sun", color:"Gold, Orange", day:"Sunday", gem:"Ruby", friendly:[1,2,3,9]},
+  2:{planet:"Moon", color:"White, Sea-green", day:"Monday", gem:"Pearl / Moonstone", friendly:[1,2,7]},
+  3:{planet:"Jupiter", color:"Yellow", day:"Thursday", gem:"Yellow Sapphire", friendly:[1,2,3,6,9]},
+  4:{planet:"Rahu", color:"Grey, Electric blue", day:"Sunday", gem:"Hessonite (Gomed)", friendly:[1,5,6]},
+  5:{planet:"Mercury", color:"Green", day:"Wednesday", gem:"Emerald", friendly:[1,3,5,6]},
+  6:{planet:"Venus", color:"Blue, Pastel pink", day:"Friday", gem:"Diamond / Opal", friendly:[3,5,6,9]},
+  7:{planet:"Ketu", color:"Grey, Purple", day:"Monday", gem:"Cat's Eye", friendly:[2,7]},
+  8:{planet:"Saturn", color:"Dark blue, Black", day:"Saturday", gem:"Blue Sapphire", friendly:[5,6,8]},
+  9:{planet:"Mars", color:"Red", day:"Tuesday", gem:"Red Coral", friendly:[1,3,6,9]}
+};
+
+function renderAttrs(containerId, n){
+  const d = NUMBER_DATA[n];
+  document.getElementById(containerId).innerHTML = `
+    <div class="attr"><span class="k">Ruling Planet</span><span class="v">${d.planet}</span></div>
+    <div class="attr"><span class="k">Lucky Day</span><span class="v">${d.day}</span></div>
+    <div class="attr"><span class="k">Lucky Color</span><span class="v">${d.color}</span></div>
+    <div class="attr"><span class="k">Gemstone</span><span class="v">${d.gem}</span></div>
+  `;
+}
+function renderCompat(spanId, n){
+  const d = NUMBER_DATA[n];
+  document.getElementById(spanId).textContent = d.friendly.filter(x=>x!==n).join(', ') || '—';
+}
+function countUp(elId, target, duration){
+  const el = document.getElementById(elId);
+  const start = performance.now();
+  function step(now){
+    const p = Math.min((now-start)/duration, 1);
+    el.textContent = Math.round(p*target);
+    if(p<1) requestAnimationFrame(step);
+  }
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.textContent = target; return; }
+  requestAnimationFrame(step);
+}
+
+// ================= kundli wheel =================
+function polar(cx,cy,r,deg){
+  const a = (deg-90) * Math.PI/180;
+  return {x: cx + r*Math.cos(a), y: cy + r*Math.sin(a)};
+}
+function drawWheel(planets, ascendant){
+  const svg = document.getElementById('wheel');
+  const cx=150, cy=150, rOuter=132, rInner=90, rCore=46;
+  let parts = '';
+  parts += `<defs><radialGradient id="discGrad" cx="50%" cy="45%" r="65%">
+    <stop offset="0%" stop-color="#242960"/>
+    <stop offset="100%" stop-color="#171A3D"/>
+  </radialGradient></defs>`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="${rOuter+6}" fill="url(#discGrad)" stroke="rgba(232,163,61,0.25)"/>`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="${rOuter}" fill="none" stroke="rgba(244,239,227,0.18)"/>`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="${rInner}" fill="none" stroke="rgba(244,239,227,0.12)"/>`;
+  parts += `<circle cx="${cx}" cy="${cy}" r="${rCore}" fill="none" stroke="rgba(232,163,61,0.35)"/>`;
+
+  const byHouse = {};
+  for(let i=1;i<=12;i++) byHouse[i] = [];
+  (planets||[]).forEach(p=>{
+    const h = ((p.house-1)%12)+1;
+    byHouse[h].push(p);
+  });
+
+  for(let h=1; h<=12; h++){
+    const deg0 = (h-1)*30;
+    const pOuter0 = polar(cx,cy,rOuter,deg0);
+    parts += `<line x1="${cx}" y1="${cy}" x2="${pOuter0.x}" y2="${pOuter0.y}" stroke="rgba(244,239,227,0.08)"/>`;
+    const labelPos = polar(cx,cy,rOuter-14, deg0+15);
+    parts += `<text x="${labelPos.x}" y="${labelPos.y}" text-anchor="middle" class="house-label">${h}</text>`;
+    byHouse[h].forEach((p,i)=>{
+      const rr = rInner - 16 - (i*15);
+      const gp = polar(cx,cy, Math.max(rr, rCore+10), deg0+15);
+      parts += `<text x="${gp.x}" y="${gp.y}" text-anchor="middle" class="planet-glyph">${(p.planet||'').slice(0,2)}</text>`;
+    });
+  }
+  parts += `<text x="${cx}" y="${cy-2}" text-anchor="middle" fill="#F4EFE3" font-family="Cinzel, serif" font-size="11">${ascendant||'ASC'}</text>`;
+  parts += `<text x="${cx}" y="${cy+13}" text-anchor="middle" fill="rgba(244,239,227,0.4)" font-family="JetBrains Mono, monospace" font-size="9">LAGNA</text>`;
+  svg.innerHTML = parts;
+}
+
+// ================= loading =================
+let loadingInterval;
+function cycleLoadingText(){
+  const msgs = ["CONSULTING THE STARS…","MAPPING YOUR HOUSES…","READING THE LAGNA…","WEIGHING SATURN'S PATIENCE…","ALMOST THERE…"];
+  let i = 0;
+  document.getElementById('loadingTxt').textContent = msgs[0];
+  loadingInterval = setInterval(()=>{
+    i = (i+1) % msgs.length;
+    document.getElementById('loadingTxt').textContent = msgs[i];
+  }, 1400);
+}
+
+// ================= main =================
+async function runReading(){
+  const name = document.getElementById('fname').value.trim();
+  const dob = document.getElementById('fdob').value;
+  const tob = document.getElementById('ftob').value;
+  const place = document.getElementById('fplace').value.trim();
+  const msg = document.getElementById('formMsg');
+  msg.textContent = '';
+
+  if(!name || !dob || !place){
+    msg.textContent = 'Please fill in your name, date of birth, and place of birth.';
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('loading').classList.add('show');
+  cycleLoadingText();
+
+  try{
+    const mulank = computeMulank(dob);
+    const bhagyank = computeBhagyank(dob);
+
+    countUp('mulankNum', mulank, 700);
+    countUp('bhagyankNum', bhagyank, 700);
+    document.getElementById('mulankText').textContent = MULANK_TEXT[mulank];
+    document.getElementById('bhagyankText').textContent = BHAGYANK_TEXT[bhagyank];
+    renderAttrs('mulankAttrs', mulank);
+    renderAttrs('bhagyankAttrs', bhagyank);
+    renderCompat('mulankCompat', mulank);
+    renderCompat('bhagyankCompat', bhagyank);
+
+    // Call backend API
+    const response = await fetch(`${API_BASE}/reading`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, dob, tob, place, mulank, bhagyank })
+    });
+
+    if(!response.ok){
+      const error = await response.json().catch(()=>({}));
+      if(response.status === 429){
+        throw new Error('The stars are busy right now (rate limited). Please wait a few seconds and try again.');
+      }
+      throw new Error(error.error || 'Failed to generate reading');
+    }
+
+    const data = await response.json();
+    const reading = data.reading;
+
+    document.getElementById('ascendantLine').textContent =
+      'Ascendant: ' + (reading.ascendant || '—') + ' · Moon: ' + (reading.moon_sign || '—') + ' · Sun: ' + (reading.sun_sign || '—');
+    drawWheel(reading.planets, reading.ascendant);
+
+    document.getElementById('planetList').innerHTML = (reading.planets||[]).map(p => `
+      <li>
+        <div class="row1"><span class="pn">${p.planet} · ${p.sign||''}</span><span class="ph">House ${p.house}</span></div>
+        <span class="note">${p.note||''}</span>
+      </li>`).join('');
+
+    document.getElementById('strengthsList').innerHTML = (reading.strengths||[]).map(s=>`<li>${s}</li>`).join('');
+    document.getElementById('challengesList').innerHTML = (reading.challenges||[]).map(s=>`<li>${s}</li>`).join('');
+
+    document.getElementById('loveText').textContent = reading.love || '';
+    document.getElementById('careerText').textContent = reading.career || '';
+    document.getElementById('successText').textContent = reading.success || '';
+    document.getElementById('yearText').textContent = reading.yearly_theme || '';
+    document.getElementById('compatText').textContent = reading.compatibility || '';
+
+    document.getElementById('remedyList').innerHTML = (reading.remedies||[]).map(r => `<li>${r}</li>`).join('');
+
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  }catch(err){
+    console.error(err);
+    document.getElementById('loading').classList.remove('show');
+    msg.textContent = err.message || 'The stars did not respond — please try again in a moment.';
+  }finally{
+    clearInterval(loadingInterval);
+    // brief cooldown so rapid re-clicks can't immediately re-trigger a rate limit
+    setTimeout(()=>{ btn.disabled = false; }, 1500);
+  }
+}
+</script>
+</body>
+</html>
