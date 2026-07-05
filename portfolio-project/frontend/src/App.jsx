@@ -70,6 +70,8 @@ const PROJECTS = [
     tags: ["HTML5", "CSS3", "JavaScript"],
     cat: ["Web", "UI/UX"],
     color: C.cyan,
+    demo: null,
+    github: "https://github.com/AbhijatPatel/PROJECTS/tree/main/portfolio-project",
   },
   {
     title: "Weather Dashboard",
