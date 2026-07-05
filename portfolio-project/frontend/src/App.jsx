@@ -492,14 +492,7 @@ function Hero({ onNavigate }) {
       <div style={{ position: "relative", zIndex: 2, maxWidth: 1180, margin: "0 auto", padding: "0 24px", width: "100%" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 40, alignItems: "center" }} className="hero-grid">
           <div>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 12,
-              color: C.cyan, border: `1px solid ${C.line}`, borderRadius: 20, padding: "6px 14px", marginBottom: 28,
-              background: "rgba(0,229,255,0.05)",
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3EE68C", boxShadow: "0 0 6px #3EE68C" }} />
-              STATUS: OPEN TO OPPORTUNITIES
-            </div>
+          
 
             <h1 style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(36px, 6.4vw, 68px)", color: C.frost, margin: "0 0 8px", lineHeight: 1.05 }}>
               <Typewriter text="Abhijat Patel" speed={90} />
