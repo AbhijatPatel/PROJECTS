@@ -62,7 +62,7 @@ docker build -t studymate-ai .
 docker run --env-file backend/.env -p 8000:8000 studymate-ai
 ```
 
-Open **http://localhost:8000** in your browser.
+Open **http://127.0.0.1:8000** in your browser.
 
 ---
 
