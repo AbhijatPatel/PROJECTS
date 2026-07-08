@@ -1,28 +1,34 @@
 # StudyMate AI — AI Learning & Quiz Assistant
 
-An AI-powered study helper: ask questions, generate quizzes, summarize notes,
-and get difficult concepts explained simply — with answers streamed in
-word-by-word using Server-Sent Events (SSE).
+An AI-powered study assistant that helps students ask questions, generate quizzes,
+summarize notes, and understand difficult concepts with beginner-friendly
+explanations. Responses are streamed in real time using **Server-Sent Events (SSE)**
+for a smooth and interactive learning experience.
 
 ## Features
-- **Ask AI** — free-form Q&A with conversation history, streamed live
-- **Quiz Generator** — pick a topic + difficulty, get 3/5/10 MCQs with an answer key
-- **Notes Summarizer** — paste notes, get concise bullet points back
-- **Explain simply** endpoint for beginner-friendly explanations
-- Fully responsive UI (mobile → desktop), no build step required
+- **Ask AI** — free-form Q&A with conversation history and live streaming responses
+- **Quiz Generator** — create 3/5/10 multiple-choice questions by topic and difficulty
+- **Notes Summarizer** — convert long notes into concise bullet-point summaries
+- **Explain Simply** — beginner-friendly explanations with simple language and examples
+- **Health Check** endpoint for monitoring application status
+- **Responsive UI** — optimized for desktop, tablet, and mobile devices
+- **Real-time Streaming** powered by Server-Sent Events (SSE)
 
 ## Tech Stack
-| Component  | Technology                          |
-|------------|--------------------------------------|
-| Frontend   | HTML, CSS, vanilla JavaScript         |
-| Backend    | Python (FastAPI)                      |
-| AI Model   | OpenAI GPT (`gpt-4.1-mini` by default)|
-| Streaming  | Server-Sent Events (SSE)              |
-| Container  | Docker                                |
-| Deployment | AWS App Runner                        |
+
+| Component | Technology |
+|-----------|------------|
+| Frontend | HTML, CSS, Vanilla JavaScript |
+| Backend | Python (FastAPI) |
+| AI Provider | Groq API |
+| AI Model | `llama-3.3-70b-versatile` |
+| Streaming | Server-Sent Events (SSE) |
+| Container | Docker |
+| Deployment | AWS App Runner |
 
 ## Project Structure
-```
+
+```text
 studymate-ai/
 ├── frontend/
 │   ├── index.html
@@ -30,102 +36,157 @@ studymate-ai/
 │   └── script.js
 ├── backend/
 │   ├── main.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env
 ├── Dockerfile
-├── .env.example
 ├── .gitignore
 └── README.md
 ```
 
-## Running locally
+## Running Locally
 
 ### 1. Configure your API key
-```bash
-cp .env.example .env
-# then edit .env and paste your real OPENAI_API_KEY
+
+Create a `.env` file inside the `backend` directory.
+
+```env
+GROQ_API_KEY=your_groq_api_key
+MODEL=llama-3.3-70b-versatile
+DEMO_MODE=false
 ```
 
 ### 2. Run with Docker (recommended)
+
 ```bash
 docker build -t studymate-ai .
-docker run --env-file .env -p 8080:8080 studymate-ai
+docker run --env-file backend/.env -p 8000:8000 studymate-ai
 ```
-Open **http://localhost:8080** — the backend serves the frontend directly,
-so there's nothing else to start.
 
-### 3. Or run without Docker
+Open **http://localhost:8000** in your browser.
+
+---
+
+### 3. Run without Docker
+
 ```bash
 cd backend
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# macOS/Linux
+source .venv/bin/activate
+
 pip install -r requirements.txt
-export OPENAI_API_KEY=sk-xxxx      # Windows (PowerShell): $env:OPENAI_API_KEY="sk-xxxx"
-export MODEL=gpt-4.1-mini
-uvicorn main:app --reload --port 8080
+
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
-Then open `../frontend/index.html` directly in a browser, or serve it with
-any static file server. If the frontend is on a different origin than the
-backend, update `API_BASE` at the top of `frontend/script.js` to the
-backend's full URL (e.g. `http://localhost:8080`).
+
+Open:
+
+```
+http://localhost:8000
+```
+
+To access from another device on the same Wi-Fi network, use your computer's local IP address:
+
+```
+http://YOUR_LOCAL_IP:8000
+```
+
+Example:
+
+```
+http://192.168.1.105:8000
+```
 
 ## API Endpoints
-All endpoints return `text/event-stream` responses, formatted as:
-```
-data: {"content": "next chunk of text"}
+
+All AI endpoints return **text/event-stream** responses.
+
+Example:
+
+```text
+data: {"content":"Hello"}
+
+data: {"content":" world"}
 
 data: [DONE]
 ```
 
-| Method | Path             | Body                                              |
-|--------|------------------|----------------------------------------------------|
-| POST   | `/api/chat`      | `{ "message": str, "history": [{role, content}] }` |
-| POST   | `/api/explain`   | `{ "topic": str }`                                 |
-| POST   | `/api/quiz`      | `{ "topic": str, "difficulty": str, "num_questions": int }` |
-| POST   | `/api/summarize` | `{ "notes": str }`                                 |
-| GET    | `/api/health`    | —                                                   |
+| Method | Endpoint | Request Body |
+|---------|----------|--------------|
+| POST | `/api/chat` | `{ "message": str, "history": [{role, content}] }` |
+| POST | `/api/explain` | `{ "topic": str }` |
+| POST | `/api/quiz` | `{ "topic": str, "difficulty": str, "num_questions": int }` |
+| POST | `/api/summarize` | `{ "notes": str }` |
+| GET | `/api/health` | — |
 
-## Prompt Templates (used internally)
+## Prompt Templates
 
-**Explain**
-```
+### Explain
+
+```text
 You are an expert teacher.
+
 Explain the following topic in simple language suitable for beginners.
+
 Topic: {topic}
+
 Use examples wherever possible.
 ```
 
-**Quiz**
-```
+### Quiz
+
+```text
 Generate {num_questions} multiple choice questions.
+
 Topic: {topic}
+
 Difficulty: {difficulty}
+
 Provide answers separately.
 ```
 
-**Summary**
-```
+### Summary
+
+```text
 Summarize the following notes into concise bullet points.
+
 Text: {notes}
 ```
 
 ## Deploying to AWS App Runner
-1. Push this project to a GitHub repository.
-2. In the AWS Console, go to **App Runner → Create service**.
-3. Choose **Source: Repository** → connect your GitHub repo.
-4. Deployment settings: select **Dockerfile** as the build method (App Runner
-   will use the included `Dockerfile` automatically).
-5. Under **Environment variables**, add:
-   - `OPENAI_API_KEY` = your key
-   - `MODEL` = `gpt-4.1-mini` (or another supported model)
-6. Set the port to `8080` (matches the Dockerfile's `EXPOSE`/`CMD`).
-7. Deploy. App Runner will give you an HTTPS URL, e.g.
-   `https://studymate-ai.awsapprunner.com`.
 
-**Never commit your `.env` file or hardcode API keys in JavaScript** — the
-key only ever lives server-side, injected as an environment variable.
+1. Push the project to a GitHub repository.
+2. Open **AWS Console → App Runner**.
+3. Create a new service from your GitHub repository.
+4. Select **Dockerfile** as the build method.
+5. Configure the following environment variables:
+
+```
+GROQ_API_KEY=your_groq_api_key
+MODEL=llama-3.3-70b-versatile
+DEMO_MODE=false
+```
+
+6. Set the application port to **8000**.
+7. Deploy the application.
+
+After deployment, App Runner will provide a public HTTPS URL similar to:
+
+```
+https://studymate-ai.awsapprunner.com
+```
+
+The application can then be accessed from any laptop, phone, or tablet with an internet connection.
 
 ## Notes
-- Conversation history for the chat tab is kept in-memory in the browser
-  tab (resets on refresh) — there's no database in this version by design,
-  matching the "optional" conversation history requirement.
-- Swap `MODEL` to any Chat Completions-compatible OpenAI model without
-  touching code.
+
+- Chat conversation history is stored only in the browser session and resets when the page is refreshed.
+- Responses are streamed in real time using **Server-Sent Events (SSE)**.
+- API keys remain server-side and are never exposed to the frontend.
+- Never commit your `.env` file or API keys to version control.
+- You can switch to any Groq-supported model by updating the `MODEL` environment variable without changing the application code.
