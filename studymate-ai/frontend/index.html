@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StudyMate AI — Learn faster, understand deeper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Literata:opsz,wght@18..144,400;18..144,500;18..144,600;18..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="board-texture" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">✦</span>
+    <span class="brand-name">StudyMate<span class="accent">AI</span></span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Main sections">
+    <button class="tab active" data-view="home" role="tab" aria-selected="true">Home</button>
+    <button class="tab" data-view="chat" role="tab" aria-selected="false">Ask AI</button>
+    <button class="tab" data-view="quiz" role="tab" aria-selected="false">Quiz</button>
+    <button class="tab" data-view="summarize" role="tab" aria-selected="false">Summarize</button>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+</header>
+
+<main id="app">
+
+  <!-- HOME -->
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <p class="eyebrow">// your ai study partner</p>
+      <h1 class="chalk-underline">Understand anything.<br>Ace everything.</h1>
+      <p class="hero-sub">Ask questions, generate quizzes, and turn messy notes into clear
+        summaries — with answers that type out in real time, like a tutor thinking out loud.</p>
+
+      <form class="hero-ask" id="heroAskForm">
+        <input type="text" id="heroAskInput" placeholder="Ask StudyMate anything… e.g. &quot;What is Newton's second law?&quot;" autocomplete="off" />
+        <button type="submit">Ask →</button>
+      </form>
+
+      <div class="demo-card" aria-hidden="true">
+        <div class="demo-card-head">
+          <span class="dot dot-yellow"></span><span class="dot dot-blue"></span><span class="dot dot-coral"></span>
+          <span class="demo-label">studymate — live answer</span>
+        </div>
+        <p class="demo-typing" id="demoTyping"></p>
+      </div>
+    </div>
+
+    <div class="feature-cards">
+      <button class="feature-card" data-view="chat">
+        <span class="feature-icon">💬</span>
+        <h3>Ask Anything</h3>
+        <p>Get clear, streamed explanations to any question, on any subject.</p>
+      </button>
+      <button class="feature-card" data-view="quiz">
+        <span class="feature-icon">📇</span>
+        <h3>Quiz Generator</h3>
+        <p>Turn a topic into a five-question multiple-choice quiz, instantly.</p>
+      </button>
+      <button class="feature-card" data-view="summarize">
+        <span class="feature-icon">📝</span>
+        <h3>Notes Summarizer</h3>
+        <p>Paste your notes and get a tight, bullet-point summary back.</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- AI CHAT -->
+  <section class="view" id="view-chat">
+    <div class="panel-head">
+      <p class="eyebrow">// ask anything</p>
+      <h2 class="chalk-underline">AI Chat</h2>
+      <p class="panel-sub">Ask a question, or paste a concept you want explained simply.</p>
+    </div>
+
+    <div class="chat-wrap">
+      <div class="chat-log" id="chatLog"></div>
+      <form class="chat-input-row" id="chatForm">
+        <input type="text" id="chatInput" placeholder="Ask a question…" autocomplete="off" />
+        <button type="submit" id="chatSend">Send</button>
+      </form>
+      <div class="chat-hint">Tip: try <button type="button" class="hint-chip" data-fill="Explain photosynthesis like I'm 12">"Explain photosynthesis like I'm 12"</button></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="view" id="view-quiz">
+    <div class="panel-head">
+      <p class="eyebrow">// test yourself</p>
+      <h2 class="chalk-underline">Quiz Generator</h2>
+      <p class="panel-sub">Pick a topic and difficulty. StudyMate writes the quiz live.</p>
+    </div>
+
+    <form class="quiz-form" id="quizForm">
+      <label class="field">
+        <span>Topic</span>
+        <input type="text" id="quizTopic" placeholder="e.g. Machine Learning" required />
+      </label>
+      <label class="field">
+        <span>Difficulty</span>
+        <select id="quizDifficulty">
+          <option>Easy</option>
+          <option>Medium</option>
+          <option>Hard</option>
+        </select>
+      </label>
+      <label class="field field-narrow">
+        <span># Questions</span>
+        <select id="quizCount">
+          <option value="3">3</option>
+          <option value="5" selected>5</option>
+          <option value="10">10</option>
+        </select>
+      </label>
+      <button type="submit" id="quizSubmit">Generate Quiz</button>
+    </form>
+
+    <div class="index-card quiz-output" id="quizOutput">
+      <p class="placeholder">Your quiz will appear here as an index card, question by question.</p>
+    </div>
+  </section>
+
+  <!-- SUMMARIZER -->
+  <section class="view" id="view-summarize">
+    <div class="panel-head">
+      <p class="eyebrow">// condense your notes</p>
+      <h2 class="chalk-underline">Notes Summarizer</h2>
+      <p class="panel-sub">Paste rough notes below — get back clean, concise bullet points.</p>
+    </div>
+
+    <div class="summarize-grid">
+      <div class="legal-pad">
+        <textarea id="notesInput" placeholder="Paste your notes here…"></textarea>
+        <button type="button" id="summarizeSubmit">Summarize →</button>
+      </div>
+      <div class="index-card summary-output" id="summaryOutput">
+        <p class="placeholder">Your summary will appear here.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span>StudyMate AI · built with FastAPI + GPT · streamed word by word</span>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
